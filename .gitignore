@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.env
+venv/
+.venv/
+
+# ML data (large files)
+ml/data/processed/*
+ml/data/raw/*
+!ml/data/processed/.gitkeep
+!ml/data/raw/.gitkeep
+
+# ML models (large binary)
+ml/models/*.h5
+ml/models/*.keras
+
+# Node
+web/node_modules/
+web/.next/
+
+# OS
+.DS_Store
+Thumbs.db
+
+
