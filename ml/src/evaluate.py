@@ -22,6 +22,13 @@ def mape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float(np.mean(np.abs((y_true - y_pred) / y_true)) * 100)
 
 
+def r_squared(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Koefisien determinasi — metrik yang sama dipakai di skripsi."""
+    ss_res = np.sum((y_true - y_pred) ** 2)
+    ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
+    return float(1 - ss_res / ss_tot)
+
+
 def directional_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """Persentase arah gerak (naik/turun) yang ditebak benar.
 
@@ -41,6 +48,7 @@ def compute_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
         "rmse": round(rmse(y_true, y_pred), 4),
         "mae": round(mae(y_true, y_pred), 4),
         "mape": round(mape(y_true, y_pred), 4),
+        "r_squared": round(r_squared(y_true, y_pred), 4),
         "directional_accuracy": round(directional_accuracy(y_true, y_pred), 4),
         "n": int(len(y_true)),
     }
