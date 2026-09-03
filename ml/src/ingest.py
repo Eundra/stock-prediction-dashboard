@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -32,6 +33,12 @@ def _normalize(df: pd.DataFrame) -> pd.DataFrame:
     df = df.sort_index()
     df = df[~df.index.duplicated(keep="last")]
     df = df.dropna(subset=["close"])
+
+    # Buang baris "hari ini" — kalau bursa masih buka, close-nya belum final
+    # dan volume-nya baru sebagian. Baris ini akan datang lagi besok, sudah lengkap.
+    today = pd.Timestamp(date.today())
+    df = df[df.index < today]
+
     return df
 
 
