@@ -85,6 +85,28 @@ def update(ticker: str = TICKER) -> pd.DataFrame:
     return combined
 
 
+def fetch_live_price(ticker: str = TICKER) -> float | None:
+    """Ambil harga terakhir hari ini (belum final, bursa mungkin masih buka).
+
+    Tidak disimpan ke CSV — cuma untuk ditampilkan sebagai "harga sementara".
+    Data final tetap menunggu ingest() setelah bursa tutup.
+    """
+    df = yf.download(ticker, period="2d", auto_adjust=False, progress=False)
+    if df is None or df.empty:
+        return None
+
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+    df.columns = [str(c).lower() for c in df.columns]
+
+    today = pd.Timestamp(date.today())
+    todays_rows = df[df.index >= today]
+    if todays_rows.empty:
+        return None
+
+    return float(todays_rows.iloc[-1]["close"])
+
+
 def main() -> None:
     df = update()
     print(
