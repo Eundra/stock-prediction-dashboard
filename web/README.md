@@ -1,16 +1,34 @@
-# React + Vite
+# Web — Stock Prediction Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend React (Vite + Tailwind CSS + Recharts). Lihat [README.md](../README.md) di root untuk gambaran project secara keseluruhan.
 
-Currently, two official plugins are available:
+## Menjalankan
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+npm install
+npm run dev
+# http://localhost:5173
+```
 
-## React Compiler
+Butuh API (`api/`) sudah jalan di `http://1x7.0.0.1:xxxx` — atur lewat `.env`:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```
+VITE_API_BASE_URL=http://1x7.0.0.1:xxxx
+```
 
-## Expanding the ESLint configuration
+## Struktur
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+src/
+├── App.jsx                    orkestrasi state & layout
+├── api.js                     semua panggilan ke backend
+├── components/                Navbar, ControlPanel, ResultCards, PriceChart, DataTable, PredictionHistory, ModelInfoCard
+├── hooks/usePredictionHistory.js   riwayat prediksi (localStorage)
+└── utils/formatters.js        format Rupiah & tanggal (locale id-ID)
+```
+
+## Alur
+
+1. Buka halaman → `/backtest` diambil otomatis, isi date selector + tabel
+2. Pilih tanggal → tombol **Prediksi** menarik data terbaru (`/ingest`) lalu memprediksi ulang
+3. Hasil tampil di card + grafik, tersimpan ke riwayat (browser, tidak ke server)
