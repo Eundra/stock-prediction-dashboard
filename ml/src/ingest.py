@@ -2,13 +2,20 @@
 
 from __future__ import annotations
 
-from datetime import date
 from pathlib import Path
 
 import pandas as pd
 import yfinance as yf
 
-from ml.src.config import BASE_COLS, RAW_DIR, START_DATE, TICKER, raw_path
+from ml.src.config import (
+    BASE_COLS,
+    MARKET_CLOSE_HOUR,
+    MARKET_TIMEZONE,
+    RAW_DIR,
+    START_DATE,
+    TICKER,
+    raw_path,
+)
 
 
 def _normalize(df: pd.DataFrame) -> pd.DataFrame:
@@ -34,10 +41,14 @@ def _normalize(df: pd.DataFrame) -> pd.DataFrame:
     df = df[~df.index.duplicated(keep="last")]
     df = df.dropna(subset=["close"])
 
-    # Buang baris "hari ini" — kalau bursa masih buka, close-nya belum final
-    # dan volume-nya baru sebagian. Baris ini akan datang lagi besok, sudah lengkap.
-    today = pd.Timestamp(date.today())
-    df = df[df.index < today]
+    # Buang baris "hari ini" SELAMA bursa belum tutup — close-nya belum final
+    # dan volume-nya baru sebagian. Begitu lewat jam tutup (WIB), baris hari ini
+    # boleh masuk. Pakai jam WIB eksplisit karena server bisa saja berjalan di
+    # timezone lain (mis. UTC di Docker) — jangan andalkan jam sistem lokal.
+    now_wib = pd.Timestamp.now(tz=MARKET_TIMEZONE).tz_localize(None)
+    today = pd.Timestamp(now_wib.date())
+    market_closed = now_wib.hour >= MARKET_CLOSE_HOUR
+    df = df[df.index <= today] if market_closed else df[df.index < today]
 
     return df
 
@@ -99,7 +110,7 @@ def fetch_live_price(ticker: str = TICKER) -> float | None:
         df.columns = df.columns.get_level_values(0)
     df.columns = [str(c).lower() for c in df.columns]
 
-    today = pd.Timestamp(date.today())
+    today = pd.Timestamp(pd.Timestamp.now(tz=MARKET_TIMEZONE).date())
     todays_rows = df[df.index >= today]
     if todays_rows.empty:
         return None

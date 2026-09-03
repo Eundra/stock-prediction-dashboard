@@ -51,16 +51,18 @@ def backtest(ticker: str, days: int = 5) -> list[dict]:
             "is_pending": False,
         })
 
-    # baris "hari ini": belum ada di raw (sudah difilter ingest.py kalau belum tutup)
-    today = date.today()
-    if raw.index.max().date() < today:
-        pred_today = predictor.predict(raw)
-        results.append({
-            "date": today.isoformat(),
-            "actual": None,
-            "actual_provisional": fetch_live_price(ticker),
-            "predicted": round(pred_today, 2),
-            "is_pending": True,
-        })
+    # Selalu tampilkan prediksi untuk hari kerja setelah data terakhir —
+    # begitu data terakhir final, langsung maju. Tidak menunggu kalender
+    # berganti, karena data yang dibutuhkan untuk prediksi ini sudah lengkap.
+    next_date = raw.index.max() + timedelta(days=1)
+    pred_next = predictor.predict(raw)
+    is_today = next_date.date() == date.today()
+    results.append({
+        "date": next_date.date().isoformat(),
+        "actual": None,
+        "actual_provisional": fetch_live_price(ticker) if is_today else None,
+        "predicted": round(pred_next, 2),
+        "is_pending": True,
+    })
 
     return results

@@ -55,3 +55,7 @@ def raw_path(ticker: str = TICKER) -> Path:
 def model_dir(ticker: str = TICKER, version: str = MODEL_VERSION) -> Path:
     """Folder artefak model: ml/models/{TICKER}/{VERSION}/."""
     return MODELS_DIR / ticker / version
+
+MARKET_TIMEZONE = "Asia/Jakarta"
+MARKET_CLOSE_HOUR = 16  # WIB, sedikit di atas jam tutup IDX (~15:50)
+
