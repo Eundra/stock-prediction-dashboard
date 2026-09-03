@@ -12,8 +12,9 @@ ml/data/raw/*
 !ml/data/raw/.gitkeep
 
 # ML models (large binary)
-ml/models/*.h5
-ml/models/*.keras
+ml/models/**/*.h5
+ml/models/**/*.keras
+ml/models/**/*.pkl
 
 # Node
 web/node_modules/

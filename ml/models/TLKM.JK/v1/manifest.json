@@ -1,0 +1,43 @@
+{
+  "ticker": "TLKM.JK",
+  "version": "v1",
+  "trained_at": "2026-09-03",
+  "window_size": 30,
+  "features": [
+    "open",
+    "high",
+    "low",
+    "volume",
+    "return",
+    "volatility",
+    "ma"
+  ],
+  "target": "close",
+  "volatility_window": 5,
+  "ma_window": 10,
+  "scaler_range": [
+    -1,
+    1
+  ],
+  "split": {
+    "train": 0.8,
+    "val": 0.1
+  },
+  "hyperparams": {
+    "lstm_units": 192,
+    "dense_units": 160,
+    "dropout_rate": 0.2,
+    "learning_rate": 0.005,
+    "batch_size": 16,
+    "epochs": 100
+  },
+  "data_range": [
+    "2011-01-03",
+    "2026-09-03"
+  ],
+  "n_rows_raw": 3852,
+  "versions": {
+    "tensorflow": "2.20.0",
+    "sklearn": "1.6.1"
+  }
+}
