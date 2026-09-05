@@ -55,7 +55,15 @@ def _normalize(df: pd.DataFrame) -> pd.DataFrame:
 
 def fetch(ticker: str = TICKER, start: str = START_DATE, end: str | None = None) -> pd.DataFrame:
     """Ambil OHLCV dari Yahoo Finance. Error kalau hasilnya kosong."""
-    df = yf.download(ticker, start=start, end=end, auto_adjust=False, progress=False)
+    df = yf.download(
+    ticker,
+    start=start,
+    end=end,
+    auto_adjust=False,
+    progress=False,
+    session=False,
+)
+    print(f"[DEBUG FETCH] ticker={ticker}, start={start}, empty={df.empty}, shape={df.shape}")
 
     if df is None or df.empty:
         raise ValueError(

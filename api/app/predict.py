@@ -11,6 +11,14 @@ from api.app.model_loader import get_predictor
 from api.app.schemas import PredictResponse
 
 
+def _next_trading_day(d: date) -> date:
+    """Lompat ke hari kerja berikutnya (skip Sabtu/Minggu)."""
+    nd = d + timedelta(days=1)
+    while nd.weekday() >= 5:  # 5=Sabtu, 6=Minggu
+        nd += timedelta(days=1)
+    return nd
+
+
 def predict_next_day(ticker: str = "TLKM.JK") -> PredictResponse:
     predictor = get_predictor()
 
@@ -18,7 +26,7 @@ def predict_next_day(ticker: str = "TLKM.JK") -> PredictResponse:
     recent = raw.tail(min_raw_rows() + 10)  # buffer aman
 
     price = predictor.predict(recent)
-    next_date = raw.index[-1] + timedelta(days=1)
+    next_date = _next_trading_day(raw.index[-1].date())
 
     staleness_days = (date.today() - raw.index[-1].date()).days
     if staleness_days > 3:
@@ -30,7 +38,7 @@ def predict_next_day(ticker: str = "TLKM.JK") -> PredictResponse:
     return PredictResponse(
         ticker=ticker,
         predicted_close=round(price, 2),
-        predicted_date=next_date.date().isoformat(),
+        predicted_date=next_date.isoformat(),
         model_version=predictor.manifest["version"],
     )
 
@@ -54,11 +62,11 @@ def backtest(ticker: str, days: int = 5) -> list[dict]:
     # Selalu tampilkan prediksi untuk hari kerja setelah data terakhir —
     # begitu data terakhir final, langsung maju. Tidak menunggu kalender
     # berganti, karena data yang dibutuhkan untuk prediksi ini sudah lengkap.
-    next_date = raw.index.max() + timedelta(days=1)
+    next_date = _next_trading_day(raw.index.max().date())
     pred_next = predictor.predict(raw)
-    is_today = next_date.date() == date.today()
+    is_today = next_date == date.today()
     results.append({
-        "date": next_date.date().isoformat(),
+        "date": next_date.isoformat(),
         "actual": None,
         "actual_provisional": fetch_live_price(ticker) if is_today else None,
         "predicted": round(pred_next, 2),

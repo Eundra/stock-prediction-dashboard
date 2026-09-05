@@ -2,6 +2,12 @@
 
 import json
 
+# curl_cffi (dipakai yfinance) HARUS di-import sebelum tensorflow — kalau
+# tensorflow ke-load duluan, impersonation SSL curl_cffi rusak dan semua
+# fetch ke Yahoo Finance gagal dengan "ImpersonateError" (konflik BoringSSL
+# statis antara kedua library dalam satu proses).
+import curl_cffi  # noqa: F401
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
