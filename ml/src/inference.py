@@ -11,20 +11,28 @@ import json
 import joblib
 import numpy as np
 import pandas as pd
-from tensorflow.keras.models import load_model
+from ai_edge_litert.interpreter import Interpreter
 
 from ml.src import config
 from ml.src.features import build_features, min_raw_rows
 
 
 class Predictor:
-    """Muat model + scaler + manifest sekali, dipakai berulang untuk tiap request."""
+    """Muat model + scaler + manifest sekali, dipakai berulang untuk tiap request.
+
+    Model disimpan sebagai .tflite (bukan .keras) supaya inference tidak
+    butuh TensorFlow penuh — TF wajib AVX, banyak server kecil (mis. Celeron
+    lama) tidak punya AVX dan langsung crash (SIGILL) begitu TF di-import.
+    """
 
     def __init__(self, model_dir=None):
         model_dir = model_dir or config.model_dir()
 
         self.manifest = json.loads((model_dir / "manifest.json").read_text())
-        self.model = load_model(model_dir / "model.keras")
+        self.interpreter = Interpreter(model_path=str(model_dir / "model.tflite"))
+        self.interpreter.allocate_tensors()
+        self._input_index = self.interpreter.get_input_details()[0]["index"]
+        self._output_index = self.interpreter.get_output_details()[0]["index"]
         self.scaler_x = joblib.load(model_dir / "scaler_x.pkl")
         self.scaler_y = joblib.load(model_dir / "scaler_y.pkl")
 
@@ -50,8 +58,10 @@ class Predictor:
             )
 
         X = self.scaler_x.transform(window)
-        X = X.reshape(1, self.window, len(self.features))
+        X = X.reshape(1, self.window, len(self.features)).astype(np.float32)
 
-        y_scaled = self.model.predict(X, verbose=0)
+        self.interpreter.set_tensor(self._input_index, X)
+        self.interpreter.invoke()
+        y_scaled = self.interpreter.get_tensor(self._output_index)
         y = self.scaler_y.inverse_transform(y_scaled)
         return float(y[0, 0])
