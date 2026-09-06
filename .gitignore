@@ -10,6 +10,7 @@ ml/data/processed/*
 ml/data/raw/*
 !ml/data/processed/.gitkeep
 !ml/data/raw/.gitkeep
+!ml/data/raw/TLKM.JK.csv
 
 # ML models (large binary) — .pkl (scaler) TIDAK diignore, API butuh itu saat runtime
 ml/models/**/*.h5
