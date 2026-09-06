@@ -11,10 +11,9 @@ ml/data/raw/*
 !ml/data/processed/.gitkeep
 !ml/data/raw/.gitkeep
 
-# ML models (large binary)
+# ML models (large binary) — .pkl (scaler) TIDAK diignore, API butuh itu saat runtime
 ml/models/**/*.h5
 ml/models/**/*.keras
-ml/models/**/*.pkl
 
 # Node
 web/node_modules/
