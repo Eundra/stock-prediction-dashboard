@@ -4,6 +4,8 @@ __pycache__/
 .env
 venv/
 .venv/
+# VITE_API_BASE_URL bukan rahasia (dibaca browser di bundle), API butuh ini saat build
+!web/.env
 
 # ML data (large files)
 ml/data/processed/*
